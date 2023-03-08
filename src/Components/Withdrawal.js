@@ -28,7 +28,7 @@ const Withdrawal = () => {
     const handlePrev  = ()=>{
         if(currePageNo !==1){
           setCurrePageNo(currePageNo-1);
-          fetch('http://localhost:5500/api/getwithdraw',{
+          fetch('/api/getwithdraw',{
           method:'post',
           body:JSON.stringify({type:'prev',lastTime:lastTime,firstWithTime:firstWithTime}),
           headers:{
@@ -54,7 +54,7 @@ const Withdrawal = () => {
     const handleNext  = ()=>{
         if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
             setCurrePageNo(currePageNo+1);
-            fetch('http://localhost:5500/api/getwithdraw',{
+            fetch('/api/getwithdraw',{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:lastTime,firstWithTime:firstWithTime}),
                 headers:{
@@ -82,7 +82,7 @@ const Withdrawal = () => {
 
 
     const ApproveWithdraw = (e)=>{
-        fetch('http://localhost:5500/api/approvewithdraw',{
+        fetch('/api/approvewithdraw',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -101,7 +101,7 @@ const Withdrawal = () => {
     }
 
     const RejectWithdraw = (e)=>{
-        fetch('http://localhost:5500/api/rejectwithdraw',{
+        fetch('/api/rejectwithdraw',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -120,7 +120,7 @@ const Withdrawal = () => {
     }
 
     const ApproveRazorpay = (e)=>{
-        fetch('http://localhost:5500/api/approverazorpay',{
+        fetch('/api/approverazorpay',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -145,7 +145,7 @@ const Withdrawal = () => {
               alert('Please enter valid upi or bank account No');
               return;
           }
-          fetch('http://localhost:5500/api/searchwithdraw',{
+          fetch('/api/searchwithdraw',{
           method:'post',
           body:JSON.stringify({search:search}),
           headers:{
@@ -170,7 +170,7 @@ const Withdrawal = () => {
             }
         });
 
-        fetch('http://localhost:5500/api/getwithdraw',{
+        fetch('/api/getwithdraw',{
             method:'post',
             body:JSON.stringify({type:'next',lastTime:0,firstWithTime:0}),
             headers:{

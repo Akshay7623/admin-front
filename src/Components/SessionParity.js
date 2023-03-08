@@ -80,8 +80,6 @@ const SessionParity = () => {
 
       if(isNum){
        // do task here only
-   
-
       }else{
         showToast('Please wait');
       }
@@ -91,7 +89,7 @@ const SessionParity = () => {
     const setTarget  = ()=>{
      let targetAmount = prompt('Please enter amount');
      if(parseInt(targetAmount) >0){
-      fetch('http://localhost:5500/api/setactivetarget',{
+      fetch('/api/setactivetarget',{
         method:'post',
         body:JSON.stringify({server:'parity',target:targetAmount}),
         headers:{
@@ -101,7 +99,7 @@ const SessionParity = () => {
       }).then((data)=>data.json()).then((finalData)=>{
 
          if(finalData.message === 'success'){
-          fetch('http://localhost:5500/api/getalltargets',{
+          fetch('/api/getalltargets',{
             method:'post',
             body:JSON.stringify({server:'parity'}),
             headers:{
@@ -131,7 +129,7 @@ const SessionParity = () => {
     }else{
       if(remainMin === 0){
         if(remainSec <=30 && remainSec>5){
-          fetch('http://localhost:5500/api/updatebet',{
+          fetch('/api/updatebet',{
           method:'post',
           body:JSON.stringify({server:'parity',number:num}),
           headers:{
@@ -142,7 +140,7 @@ const SessionParity = () => {
         console.log(finalData);
         if(finalData.message === 'success'){
           
-          fetch('http://localhost:5500/api/getalltargets',{
+          fetch('/api/getalltargets',{
           method:'post',
           body:JSON.stringify({server:'parity'}),
           headers:{
@@ -167,7 +165,6 @@ const SessionParity = () => {
         showToast('Please wait ...');
       }
     }
-     
     }
     useEffect(()=>{
         AuthAdmin().then((finalData)=>{
@@ -176,7 +173,7 @@ const SessionParity = () => {
             }
           });
 
-      fetch('http://localhost:5500/api/getalltargets',{
+      fetch('/api/getalltargets',{
         method:'post',
         body:JSON.stringify({server:'parity'}),
         headers:{
@@ -195,7 +192,7 @@ const SessionParity = () => {
         let sec = getSec();
 
         if(min === 0 && sec >30){
-          fetch('http://localhost:5500/api/getbetdata',{
+          fetch('/api/getbetdata',{
             method:'post',
             body:JSON.stringify({server:'parity'}),
             headers:{
@@ -205,7 +202,7 @@ const SessionParity = () => {
             }).then((data)=>data.json()).then((finalData)=>{
               if(finalData.count === 0){
                 let getDataInter = setInterval(()=>{
-                 fetch('http://localhost:5500/api/getbetdata',{
+                 fetch('/api/getbetdata',{
                  method:'post',
                  body:JSON.stringify({server:'parity'}),
                  headers:{
@@ -224,9 +221,9 @@ const SessionParity = () => {
                       }else if(index === 2 || index === 4 || index === 6 || index === 8){
                         arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[12]*2));
                       }else if(index === 0){
-                        arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*5) + (finalData.result[0].BetMoney[11]*1.5));
+                        arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*4.5) + (finalData.result[0].BetMoney[12]*1.5));
                       }else{
-                        arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*5) + (finalData.result[0].BetMoney[12]*1.5));
+                        arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*4.5) + (finalData.result[0].BetMoney[10]*1.5));
                       }
                     });
                     setProfitLoss(arrProfitLoss);
@@ -244,12 +241,13 @@ const SessionParity = () => {
                   }else if(index === 2 || index === 4 || index === 6 || index === 8){
                     arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[12]*2));
                   }else if(index === 0){
-                    arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*5) + (finalData.result[0].BetMoney[11]*1.5));
+                    arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*4.5) + (finalData.result[0].BetMoney[12]*1.5));
                   }else{
-                    arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*5) + (finalData.result[0].BetMoney[12]*1.5));
+                    arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*4.5) + (finalData.result[0].BetMoney[10]*1.5));
                   }
                 });
                 setProfitLoss(arrProfitLoss);
+                console.log(arrProfitLoss);
                 setBetMoney(finalData.result[0].BetMoney);
                }
             });
@@ -271,7 +269,7 @@ const SessionParity = () => {
             }
 
             if(min === 0 && sec === 30){
-              fetch('http://localhost:5500/api/getbetdata',{
+              fetch('/api/getbetdata',{
                 method:'post',
                 body:JSON.stringify({server:'parity'}),
                 headers:{
@@ -281,7 +279,7 @@ const SessionParity = () => {
                 }).then((data)=>data.json()).then((finalData)=>{
                   if(finalData.count === 0){
                     let getDataInterval = setInterval(()=>{
-                     fetch('http://localhost:5500/api/getbetdata',{
+                     fetch('/api/getbetdata',{
                      method:'post',
                      body:JSON.stringify({server:'parity'}),
                      headers:{
@@ -300,12 +298,13 @@ const SessionParity = () => {
                           }else if(index === 2 || index === 4 || index === 6 || index === 8){
                             arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[12]*2));
                           }else if(index === 0){
-                            arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*5) + (finalData.result[0].BetMoney[11]*1.5));
+                            arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*4.5) + (finalData.result[0].BetMoney[12]*1.5));
                           }else{
-                            arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*5) + (finalData.result[0].BetMoney[12]*1.5));
+                            arrProfitLoss[index] = totalBetAmount - ((finalData.result[0].BetMoney[index]*10) + (finalData.result[0].BetMoney[11]*4.5) + (finalData.result[0].BetMoney[10]*1.5));
                           }
                         });
                         setProfitLoss(arrProfitLoss);
+                        console.log(arrProfitLoss);
                         clearInterval(getDataInterval);
                        }
                      });

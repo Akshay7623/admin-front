@@ -4,7 +4,7 @@ import SideBar from './SideBar';
 import AuthAdmin from './AuthAdmin';
 
 const Bonus = () => {
-
+    
     let x = new Date().getTime();
     const [search,setSearch] = useState('');
     const [lastTime,setLastTime] = useState(x);
@@ -27,7 +27,7 @@ const Bonus = () => {
     const handlePrev  = ()=>{
         if(currePageNo !==1){
           setCurrePageNo(currePageNo-1);
-          fetch('http://localhost:5500/api/getbonusrecord',{
+          fetch('/api/getbonusrecord',{
           method:'post',
           body:JSON.stringify({type:'prev',lastTime:lastTime,firstWithTime:firstWithTime}),
           headers:{
@@ -53,7 +53,7 @@ const Bonus = () => {
     const handleNext  = ()=>{
         if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
             setCurrePageNo(currePageNo+1);
-            fetch('http://localhost:5500/api/getbonusrecord',{
+            fetch('/api/getbonusrecord',{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:lastTime,firstWithTime:firstWithTime}),
                 headers:{
@@ -81,7 +81,7 @@ const Bonus = () => {
 
 
     const ApproveBonus = (e)=>{
-        fetch('http://localhost:5500/api/approvebonus',{
+        fetch('/api/approvebonus',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -100,7 +100,7 @@ const Bonus = () => {
     }
 
     const RejectBonus = (e)=>{
-        fetch('http://localhost:5500/api/rejectbonus',{
+        fetch('/api/rejectbonus',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -126,7 +126,7 @@ const Bonus = () => {
             }
         });
 
-        fetch('http://localhost:5500/api/getbonusrecord',{
+        fetch('/api/getbonusrecord',{
             method:'post',
             body:JSON.stringify({type:'next',lastTime:0,firstWithTime:0}),
             headers:{

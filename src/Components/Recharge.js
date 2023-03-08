@@ -37,7 +37,7 @@ const Recharge = () => {
      
     const deleteUpi = (e)=>{
 
-        fetch('http://localhost:5500/api/delete',{
+        fetch('/api/delete',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -47,7 +47,7 @@ const Recharge = () => {
           }).then((data)=>data.json()).then((finalData)=>{
               if(finalData.message === 'success'){
             showToast('UPI Deleted successfully !');
-                  fetch('http://localhost:5500/api/showupi',{
+                  fetch('/api/showupi',{
                       method:'get',
                       headers:{
                           'Content-Type':'application/json',
@@ -63,7 +63,7 @@ const Recharge = () => {
 
     const addUPI = ()=>{
       let upi = prompt('Enter new upi id');
-      fetch('http://localhost:5500/api/addupi',{
+      fetch('/api/addupi',{
         method:'post',
         body:JSON.stringify({upi:upi}),
         headers:{
@@ -73,7 +73,7 @@ const Recharge = () => {
       }).then((data)=>data.json()).then((finalData)=>{
           if(finalData.message === 'success'){
             showToast('New UPI added successfully ');
-              fetch('http://localhost:5500/api/showupi',{
+              fetch('/api/showupi',{
                   method:'get',
                   headers:{
                       'Content-Type':'application/json',
@@ -90,7 +90,7 @@ const Recharge = () => {
     const handlePrev  = ()=>{
         if(currePageNo !==1){
           setCurrePageNo(currePageNo-1);
-          fetch('http://localhost:5500/api/getrecharge',{
+          fetch('/api/getrecharge',{
           method:'post',
           body:JSON.stringify({type:'prev',lastTime:lastTime,firstBetTime:firstBetTime}),
           headers:{
@@ -116,7 +116,7 @@ const Recharge = () => {
     const handleNext  = ()=>{
         if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
             setCurrePageNo(currePageNo+1);
-            fetch('http://localhost:5500/api/getrecharge',{
+            fetch('/api/getrecharge',{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:lastTime,firstBetTime:firstBetTime}),
                 headers:{
@@ -136,7 +136,7 @@ const Recharge = () => {
     const ApproveRecharge = (e)=>{
         let con = window.confirm('Are you sure want to approve this recharge ?');
         if(con){
-        fetch('http://localhost:5500/api/approverecharge',{
+        fetch('/api/approverecharge',{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -156,7 +156,7 @@ const Recharge = () => {
      const RejectRecharge = (e)=>{
         let con = window.confirm('Are you sure want to reject this recharge ?');
         if(con){
-            fetch('http://localhost:5500/api/rejectrecharge',{
+            fetch('/api/rejectrecharge',{
                 method:'post',
                 body:JSON.stringify({id:e.target.id}),
                 headers:{
@@ -181,7 +181,7 @@ const Recharge = () => {
               alert('Please enter valid UTR No');
               return;
           }
-          fetch('http://localhost:5500/api/searchrecharge',{
+          fetch('/api/searchrecharge',{
           method:'post',
           body:JSON.stringify({search:search}),
           headers:{
@@ -205,7 +205,7 @@ const Recharge = () => {
               navigate('/');
             }
           });
-      fetch('http://localhost:5500/api/showupi',{
+      fetch('/api/showupi',{
             method:'get',
             headers:{
                 'Content-Type':'application/json',
@@ -215,7 +215,7 @@ const Recharge = () => {
                 setUpidata(finalData);
             });
     
-     fetch('http://localhost:5500/api/getrecharge',{
+     fetch('/api/getrecharge',{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:0,firstBetTime:0}),
                 headers:{

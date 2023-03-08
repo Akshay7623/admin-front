@@ -27,7 +27,7 @@ const Complaints = () => {
 
   const handlePrev  = ()=>{
       if(currePageNo !==1){
-        fetch('http://localhost:5500/api/getcomplains',{
+        fetch('/api/getcomplains',{
         method:'post',
         body:JSON.stringify({type:'prev',lastTime:lastTime,firstWithTime:firstWithTime}),
         headers:{
@@ -52,7 +52,7 @@ const Complaints = () => {
 
   const handleNext  = ()=>{
       if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
-          fetch('http://localhost:5500/api/getcomplains',{
+          fetch('/api/getcomplains',{
               method:'post',
               body:JSON.stringify({type:'next',lastTime:lastTime,firstWithTime:firstWithTime}),
               headers:{
@@ -98,7 +98,7 @@ const Complaints = () => {
             alert('Please enter valid upi or bank account No');
             return;
         }
-        fetch('http://localhost:5500/api/searchwithdraw',{
+        fetch('/api/searchwithdraw',{
         method:'post',
         body:JSON.stringify({search:search}),
         headers:{
@@ -120,7 +120,7 @@ const Complaints = () => {
         showToast('Please write something');  
         return;
       }
-      fetch('http://localhost:5500/api/setcomplains',{
+      fetch('/api/setcomplains',{
         method:'post',
         body:JSON.stringify({id:activeId,solution:solution}),
         headers:{
@@ -149,7 +149,7 @@ const Complaints = () => {
           }
       });
 
-      fetch('http://localhost:5500/api/getcomplains',{
+      fetch('/api/getcomplains',{
           method:'post',
           body:JSON.stringify({type:'next',lastTime:0,firstWithTime:0}),
           headers:{

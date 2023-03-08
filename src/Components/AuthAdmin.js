@@ -4,7 +4,7 @@ const AuthAdmin = async() => {
    const token = localStorage.getItem('token');
    let isValid;
    if(token){
-         isValid = await fetch('http://localhost:5500/api/authadmin',{
+         isValid = await fetch('/api/authadmin',{
                        method:'post',
                        headers:{
                       'Content-Type':'application/json',

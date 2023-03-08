@@ -24,7 +24,7 @@ const Login = () => {
       return;
     }
 
-    fetch('http://localhost:5500/api/login',{
+    fetch('/api/login',{
       method:'post',
       body:JSON.stringify({username:username, password:password}),
       headers:{

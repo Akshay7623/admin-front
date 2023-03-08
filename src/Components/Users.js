@@ -22,7 +22,7 @@ const Users= ()=> {
 
     if(parseInt(newBal)>0){
         console.log('now go');
-        fetch('http://localhost:5500/api/updatewallet',{
+        fetch('/api/updatewallet',{
             method:'post',
             body:JSON.stringify({id:e.target.id,newBal:newBal}),
             headers:{
@@ -47,7 +47,7 @@ const Users= ()=> {
             alert('Please enter valid ID');
             return;
         }
-        fetch('http://localhost:5500/api/searchuser',{
+        fetch('/api/searchuser',{
         method:'post',
         body:JSON.stringify({search:search}),
         headers:{
@@ -76,7 +76,7 @@ const Users= ()=> {
   const handleNext  = ()=>{
     if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
         setCurrePageNo(currePageNo+1);
-        fetch('http://localhost:5500/api/getalluser',{
+        fetch('/api/getalluser',{
             method:'post',
             body:JSON.stringify({type:'next',lastTime:lastTime,firstBetTime:firstBetTime}),
             headers:{
@@ -96,7 +96,7 @@ const Users= ()=> {
   const handlePrev  = ()=>{
       if(currePageNo !==1){
         setCurrePageNo(currePageNo-1);
-        fetch('http://localhost:5500/api/getalluser',{
+        fetch('/api/getalluser',{
         method:'post',
         body:JSON.stringify({type:'prev',lastTime:lastTime,firstBetTime:firstBetTime}),
         headers:{
@@ -131,7 +131,7 @@ const Users= ()=> {
    let userId = e.target.getAttribute('data-id');
    let dec = window.confirm('Are you sure want to Disable this user');
    if(dec){
-    fetch('http://localhost:5500/api/useraction',{
+    fetch('/api/useraction',{
         method:'post',
         body:JSON.stringify({event:'disable',id:userId}),
         headers:{
@@ -150,7 +150,7 @@ const Users= ()=> {
    let userId = e.target.getAttribute('data-id');
    let dec = window.confirm('Are you sure want to Enable this user');
    if(dec){
-    fetch('http://localhost:5500/api/useraction',{
+    fetch('/api/useraction',{
         method:'post',
         body:JSON.stringify({event:'enable',id:userId}),
         headers:{
@@ -173,7 +173,7 @@ const Users= ()=> {
         }
       });
 
-      fetch('http://localhost:5500/api/getalluser',{
+      fetch('/api/getalluser',{
         method:'post',
         body:JSON.stringify({type:'next',lastTime:x,firstBetTime:0}),
         headers:{

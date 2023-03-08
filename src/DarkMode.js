@@ -1,8 +1,6 @@
 import React from 'react'
 
 const DarkMode = () => {
-
-    
   // const body = document.querySelector("body");
   const [stats,setStats] = useState({
       
