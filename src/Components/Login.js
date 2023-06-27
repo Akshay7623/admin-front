@@ -1,6 +1,7 @@
 import React,{useState,useEffect} from 'react'
 import {useNavigate} from 'react-router-dom';
 import AuthAdmin from './AuthAdmin';
+import Hosturl from '../Hosturl';
 
 const Login = () => {
   
@@ -24,7 +25,7 @@ const Login = () => {
       return;
     }
 
-    fetch('/api/login',{
+    fetch(`${Hosturl}/api/login`,{
       method:'post',
       body:JSON.stringify({username:username, password:password}),
       headers:{
@@ -52,16 +53,12 @@ const Login = () => {
       navigate('/dashboard');
       return;
      }
-
-     
     });
-
-
-
   }
+
   useEffect(() => {
     AuthAdmin().then((finalData)=>{
-      if(finalData){
+      if(finalData.message === 'success'){
         navigate('/dashboard');
       }
     });

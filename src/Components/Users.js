@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react';
 import { useNavigate } from 'react-router-dom';
 import AuthAdmin from './AuthAdmin';
 import SideBar from './SideBar';
+import Hosturl from '../Hosturl';
 
 const Users= ()=> {
 
@@ -22,7 +23,7 @@ const Users= ()=> {
 
     if(parseInt(newBal)>0){
         console.log('now go');
-        fetch('/api/updatewallet',{
+        fetch(`${Hosturl}/api/updatewallet`,{
             method:'post',
             body:JSON.stringify({id:e.target.id,newBal:newBal}),
             headers:{
@@ -47,7 +48,7 @@ const Users= ()=> {
             alert('Please enter valid ID');
             return;
         }
-        fetch('/api/searchuser',{
+        fetch(`${Hosturl}/api/searchuser`,{
         method:'post',
         body:JSON.stringify({search:search}),
         headers:{
@@ -76,7 +77,7 @@ const Users= ()=> {
   const handleNext  = ()=>{
     if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
         setCurrePageNo(currePageNo+1);
-        fetch('/api/getalluser',{
+        fetch(`${Hosturl}/api/getalluser`,{
             method:'post',
             body:JSON.stringify({type:'next',lastTime:lastTime,firstBetTime:firstBetTime}),
             headers:{
@@ -96,7 +97,7 @@ const Users= ()=> {
   const handlePrev  = ()=>{
       if(currePageNo !==1){
         setCurrePageNo(currePageNo-1);
-        fetch('/api/getalluser',{
+        fetch(`${Hosturl}/api/getalluser`,{
         method:'post',
         body:JSON.stringify({type:'prev',lastTime:lastTime,firstBetTime:firstBetTime}),
         headers:{
@@ -131,7 +132,7 @@ const Users= ()=> {
    let userId = e.target.getAttribute('data-id');
    let dec = window.confirm('Are you sure want to Disable this user');
    if(dec){
-    fetch('/api/useraction',{
+    fetch(`${Hosturl}/api/useraction`,{
         method:'post',
         body:JSON.stringify({event:'disable',id:userId}),
         headers:{
@@ -150,7 +151,7 @@ const Users= ()=> {
    let userId = e.target.getAttribute('data-id');
    let dec = window.confirm('Are you sure want to Enable this user');
    if(dec){
-    fetch('/api/useraction',{
+    fetch(`${Hosturl}/api/useraction`,{
         method:'post',
         body:JSON.stringify({event:'enable',id:userId}),
         headers:{
@@ -173,7 +174,7 @@ const Users= ()=> {
         }
       });
 
-      fetch('/api/getalluser',{
+      fetch(`${Hosturl}/api/getalluser`,{
         method:'post',
         body:JSON.stringify({type:'next',lastTime:x,firstBetTime:0}),
         headers:{
@@ -183,7 +184,7 @@ const Users= ()=> {
         }).then((data)=>data.json()).then((finalData)=>{
         console.log(finalData.users);
         setUsers(finalData.users);
-        setTotalDoc(finalData.count)
+        setTotalDoc(finalData.count);
         setLastTime(Object.values(finalData.users)[Object.values(finalData.users).length - 1].time);
         setFirstBetTime((finalData.users)['0'].time);
         });

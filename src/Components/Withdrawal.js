@@ -2,7 +2,7 @@ import React, {useEffect, useState} from 'react'
 import { NavLink,useNavigate} from 'react-router-dom';
 import AuthAdmin from './AuthAdmin';
 import SideBar from './SideBar';
-
+import Hosturl from '../Hosturl';
 
 const Withdrawal = () => {
 
@@ -28,7 +28,7 @@ const Withdrawal = () => {
     const handlePrev  = ()=>{
         if(currePageNo !==1){
           setCurrePageNo(currePageNo-1);
-          fetch('/api/getwithdraw',{
+          fetch(`${Hosturl}/api/getwithdraw`,{
           method:'post',
           body:JSON.stringify({type:'prev',lastTime:lastTime,firstWithTime:firstWithTime}),
           headers:{
@@ -42,7 +42,6 @@ const Withdrawal = () => {
           ObjKey.map((val,index)=>{
               finalObj[index] = ObjVal[val];
           });
-          console.log(finalObj);
           setWithdraw(finalObj);
           setTotalDoc(finalData.count);
           setLastTime(Object.values(finalObj)[Object.values(finalObj).length - 1].time);
@@ -54,7 +53,7 @@ const Withdrawal = () => {
     const handleNext  = ()=>{
         if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
             setCurrePageNo(currePageNo+1);
-            fetch('/api/getwithdraw',{
+            fetch(`${Hosturl}/api/getwithdraw`,{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:lastTime,firstWithTime:firstWithTime}),
                 headers:{
@@ -62,7 +61,6 @@ const Withdrawal = () => {
                     'Authorization':`Bearer ${token}`
                 }
                 }).then((data)=>data.json()).then((finalData)=>{
-                console.log(finalData.withdraw);
                 setWithdraw(finalData.withdraw);
                 setTotalDoc(finalData.count);
                 setLastTime(Object.values(finalData.withdraw)[Object.values(finalData.withdraw).length - 1].time);
@@ -82,7 +80,7 @@ const Withdrawal = () => {
 
 
     const ApproveWithdraw = (e)=>{
-        fetch('/api/approvewithdraw',{
+        fetch(`${Hosturl}api/approvewithdraw`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -90,7 +88,6 @@ const Withdrawal = () => {
                 'Authorization':`Bearer ${token}`
             }
         }).then((data)=>data.json()).then((finalData)=>{
-            console.log(finalData);
             if(finalData.message === 'success'){
                 showToast('Approved Successfully');
                 e.target.innerHTML = 'Done';
@@ -101,7 +98,7 @@ const Withdrawal = () => {
     }
 
     const RejectWithdraw = (e)=>{
-        fetch('/api/rejectwithdraw',{
+        fetch(`${Hosturl}/api/rejectwithdraw`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -109,7 +106,6 @@ const Withdrawal = () => {
                 'Authorization':`Bearer ${token}`
             }
         }).then((data)=>data.json()).then((finalData)=>{
-            console.log(finalData);
             if(finalData.message === 'success'){
                 showToast('Rejected Successfully');
                 e.target.innerHTML = 'Done';
@@ -120,7 +116,7 @@ const Withdrawal = () => {
     }
 
     const ApproveRazorpay = (e)=>{
-        fetch('/api/approverazorpay',{
+        fetch(`${Hosturl}/api/approverazorpay`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -128,7 +124,6 @@ const Withdrawal = () => {
                 'Authorization':`Bearer ${token}`
             }
         }).then((data)=>data.json()).then((finalData)=>{
-            console.log(finalData);
             if(finalData.message === 'success'){
                 e.target.innerHTML = 'Done';
                 showToast('Money transeferred Successfully ');
@@ -145,7 +140,7 @@ const Withdrawal = () => {
               alert('Please enter valid upi or bank account No');
               return;
           }
-          fetch('/api/searchwithdraw',{
+          fetch(`${Hosturl}/api/searchwithdraw`,{
           method:'post',
           body:JSON.stringify({search:search}),
           headers:{
@@ -153,7 +148,6 @@ const Withdrawal = () => {
               'Authorization':`Bearer ${token}`
           }
           }).then((data)=>data.json()).then((finalData)=>{
-                console.log(finalData.withdraw);
                 setWithdraw(finalData.withdraw);
                 setTotalDoc(finalData.count);
                 setLastTime(Object.values(finalData.withdraw)[Object.values(finalData.withdraw).length - 1].time);
@@ -170,7 +164,7 @@ const Withdrawal = () => {
             }
         });
 
-        fetch('/api/getwithdraw',{
+        fetch(`${Hosturl}/api/getwithdraw`,{
             method:'post',
             body:JSON.stringify({type:'next',lastTime:0,firstWithTime:0}),
             headers:{
@@ -178,7 +172,6 @@ const Withdrawal = () => {
                 'Authorization':`Bearer ${token}`
             }
         }).then((data)=>data.json()).then((finalData)=>{
-            console.log(finalData.withdraw);
             setWithdraw(finalData.withdraw);
             setTotalDoc(finalData.count);
             setLastTime(Object.values(finalData.withdraw)[Object.values(finalData.withdraw).length - 1].time);

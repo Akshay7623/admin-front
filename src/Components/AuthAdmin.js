@@ -1,10 +1,10 @@
-import React from 'react'
+import Hosturl from '../Hosturl';
 
 const AuthAdmin = async() => {
    const token = localStorage.getItem('token');
    let isValid;
    if(token){
-         isValid = await fetch('/api/authadmin',{
+         isValid = await fetch(`${Hosturl}/api/authadmin`,{
                        method:'post',
                        headers:{
                       'Content-Type':'application/json',
@@ -13,7 +13,8 @@ const AuthAdmin = async() => {
         isValid = await isValid.json();
         return isValid;
    }else{
-       return false;
+       localStorage.clear();
+       return {message:false};
    }
 }
 

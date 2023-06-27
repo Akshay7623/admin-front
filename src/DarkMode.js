@@ -49,7 +49,7 @@ const logout = ()=>{
 }
 
 //   const getStatics = ()=>{
-//       fetch('http://localhost:5000/api/getstatics',{
+//       fetch('http://localhost:5000http://localhost:5500/api/getstatics',{
 //           method:'get',
 //           headers:{
 //               'Content-Type':'application/json',

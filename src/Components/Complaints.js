@@ -2,6 +2,7 @@ import React,{useEffect,useState} from 'react';
 import AuthAdmin from './AuthAdmin';
 import { useNavigate } from 'react-router';
 import SideBar from './SideBar';
+import Hosturl from '../Hosturl';
 
 const Complaints = () => {
   let x = new Date().getTime();
@@ -27,7 +28,7 @@ const Complaints = () => {
 
   const handlePrev  = ()=>{
       if(currePageNo !==1){
-        fetch('/api/getcomplains',{
+        fetch(`${Hosturl}/api/getcomplains`,{
         method:'post',
         body:JSON.stringify({type:'prev',lastTime:lastTime,firstWithTime:firstWithTime}),
         headers:{
@@ -52,7 +53,7 @@ const Complaints = () => {
 
   const handleNext  = ()=>{
       if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
-          fetch('/api/getcomplains',{
+          fetch(`${Hosturl}/api/getcomplains`,{
               method:'post',
               body:JSON.stringify({type:'next',lastTime:lastTime,firstWithTime:firstWithTime}),
               headers:{
@@ -98,7 +99,7 @@ const Complaints = () => {
             alert('Please enter valid upi or bank account No');
             return;
         }
-        fetch('/api/searchwithdraw',{
+        fetch(`${Hosturl}/api/searchwithdraw`,{
         method:'post',
         body:JSON.stringify({search:search}),
         headers:{
@@ -120,7 +121,7 @@ const Complaints = () => {
         showToast('Please write something');  
         return;
       }
-      fetch('/api/setcomplains',{
+      fetch(`${Hosturl}/api/setcomplains`,{
         method:'post',
         body:JSON.stringify({id:activeId,solution:solution}),
         headers:{
@@ -149,7 +150,7 @@ const Complaints = () => {
           }
       });
 
-      fetch('/api/getcomplains',{
+      fetch(`${Hosturl}/api/getcomplains`,{
           method:'post',
           body:JSON.stringify({type:'next',lastTime:0,firstWithTime:0}),
           headers:{

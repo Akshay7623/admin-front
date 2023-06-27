@@ -216,7 +216,7 @@ nav.close ~ .dashboard{
     width: calc(100% - 73px);
 }
 .dashboard .top{
-    position: fixed;
+    /* position: fixed; */
     top: 0;
     left: 250px;
     display: flex;
@@ -692,15 +692,16 @@ form
     animation: modal-scale-animation 0.3s ease;
   }
 
+
   .setRuleModal {
-    position: fixed;
+    position: absolute;
     top: 10%;
     display: none;
     z-index: 5;
   }
 
   .rule-modal-content {
-    position: relative;
+    /* position: relative; */
     display: flex;
     flex-direction: column;
     vertical-align: middle;
@@ -803,3 +804,19 @@ form
   border: 2px solid rgb(250, 126, 126);
 }
 
+.table-row {
+    display: table-row;
+  }
+
+.table-cell {
+    display: table-cell;
+    padding: 10px;
+    border: 1px solid black;
+    text-align: center;
+  }
+
+.result-table{
+  display: table;
+  width: 100%;
+  border-collapse: collapse;
+}

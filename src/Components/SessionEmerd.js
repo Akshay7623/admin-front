@@ -1,8 +1,12 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useState,useRef} from 'react';
 import { useNavigate } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import AuthAdmin from './AuthAdmin';
 import SideBar from './SideBar';
+import * as htmlToImage from 'html-to-image';
+import RunMall from './images/runmall.jpg';
+import MakePrediction from './MakePrediction';
+import Hosturl from '../Hosturl';
 
 const SessionEmerd = () => {
 
@@ -15,6 +19,12 @@ const SessionEmerd = () => {
     const navigate = useNavigate();
     const token = localStorage.getItem('token');
    
+    const [predictionTime, setPredictionTime] = useState('');
+    const [color, setColor] = useState('');
+    const [predictionResult, setPredictionResult] = useState([{server:"",period:"",predict:"",result:""}]);
+    const [checked,setChecked] = useState(false);
+    const divRef = useRef(null); 
+
       function showToast(message) {
           var x = document.getElementById("snackbar");
           x.innerHTML=message;
@@ -89,7 +99,7 @@ const SessionEmerd = () => {
     const setTarget  = ()=>{
      let targetAmount = prompt('Please enter amount');
      if(parseInt(targetAmount) >0){
-      fetch('/api/setactivetarget',{
+      fetch(`${Hosturl}/api/setactivetarget`,{
         method:'post',
         body:JSON.stringify({server:'emerd',target:targetAmount}),
         headers:{
@@ -99,7 +109,7 @@ const SessionEmerd = () => {
       }).then((data)=>data.json()).then((finalData)=>{
 
          if(finalData.message === 'success'){
-          fetch('/api/getalltargets',{
+          fetch(`${Hosturl}/api/getalltargets`,{
             method:'post',
             body:JSON.stringify({server:'emerd'}),
             headers:{
@@ -118,7 +128,6 @@ const SessionEmerd = () => {
      }
     }
 
-
     const submitPeriod = ()=>{
      let remainMin = Math.abs(getMinutes()%3 - 2);
      let remainSec = 59 - getSec();
@@ -129,7 +138,7 @@ const SessionEmerd = () => {
     }else{
       if(remainMin === 0){
         if(remainSec <=30 && remainSec>5){
-          fetch('/api/updatebet',{
+          fetch(`${Hosturl}/api/updatebet`,{
           method:'post',
           body:JSON.stringify({server:'emerd',number:num}),
           headers:{
@@ -140,7 +149,7 @@ const SessionEmerd = () => {
         console.log(finalData);
         if(finalData.message === 'success'){
           
-          fetch('/api/getalltargets',{
+          fetch(`${Hosturl}/api/getalltargets`,{
           method:'post',
           body:JSON.stringify({server:'emerd'}),
           headers:{
@@ -166,6 +175,79 @@ const SessionEmerd = () => {
       }
     }
     }
+
+    const handleConvertClick = () => {
+      const divElement = divRef.current; 
+      htmlToImage.toPng(divElement)
+        .then(function (dataUrl) {
+          const link = document.createElement('a');
+          link.download = 'my-image.png';
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(function (error) {
+          console.error('Oops, something went wrong!', error);
+        });
+    };
+
+    const hanldeImageGen  = ()=>{
+      OpenRuleModal('Make prediction');
+    }
+
+    
+    const genImage = ()=>{
+
+      if(color === ''){
+        showToast('Please select color');
+        return;
+      }
+      
+      let Currdate = new Date();
+      let thisYear = String(Currdate.getUTCFullYear());
+      let thisMonth = String((Currdate.getMonth() + 1) >= 10 ? (Currdate.getMonth() + 1) : '0' + String((Currdate.getMonth() + 1)));
+      let toDay = String(((Currdate.getDate()) >= 10) ? (Currdate.getDate()) : '0' + String(Currdate.getDate()));
+      let x = thisYear + thisMonth + toDay;
+
+      let cp = getPeriod();
+
+      if(predictionTime === 10){
+        x = x + '201';
+      }else if(predictionTime === 2){
+        x = x + '281';
+      }else if(predictionTime === 5){
+        x = x + '341';
+      }else if(predictionTime === 8){
+        x = x + '401';
+      }
+      
+      if(x === cp){
+        MakePrediction('emerd',cp,color,x,true).then(()=>{
+          setPredictionResult([{server:'emerd',period:cp,predict:color,result:''}]);
+        });
+      }else{
+        MakePrediction('emerd',cp,color,x,false).then((data)=>{
+          console.log(data.data);
+          if(checked){
+            setPredictionResult([...data.data,{server:'',period:'',predict:'white',result:'Profit'}]);
+          }else{
+            setPredictionResult([...data.data,{server:'emerd',period:cp,predict:color,result:''}]);
+          }
+        });
+      }
+
+    }
+
+    const OpenRuleModal = (title)=>{
+      document.getElementById('rule-modal').classList.add('show-submenu');
+      document.getElementById("modal-background").classList.add("show-submenu");
+      document.getElementById('title').innerHTML = title;
+      }
+  
+     const closeRuleModal = ()=>{
+          document.getElementById('rule-modal').classList.remove('show-submenu');
+          document.getElementById("modal-background").classList.remove("show-submenu");
+      }
+
     useEffect(()=>{
         AuthAdmin().then((finalData)=>{
             if(finalData.message !== 'success'){
@@ -173,7 +255,7 @@ const SessionEmerd = () => {
             }
           });
 
-      fetch('/api/getalltargets',{
+      fetch(`${Hosturl}/api/getalltargets`,{
         method:'post',
         body:JSON.stringify({server:'emerd'}),
         headers:{
@@ -192,7 +274,7 @@ const SessionEmerd = () => {
         let sec = getSec();
 
         if(min === 0 && sec >30){
-          fetch('/api/getbetdata',{
+          fetch(`${Hosturl}/api/getbetdata`,{
             method:'post',
             body:JSON.stringify({server:'emerd'}),
             headers:{
@@ -202,7 +284,7 @@ const SessionEmerd = () => {
             }).then((data)=>data.json()).then((finalData)=>{
               if(finalData.count === 0){
                 let getDataInter = setInterval(()=>{
-                 fetch('/api/getbetdata',{
+                 fetch(`${Hosturl}/api/getbetdata`,{
                  method:'post',
                  body:JSON.stringify({server:'emerd'}),
                  headers:{
@@ -269,7 +351,7 @@ const SessionEmerd = () => {
             }
 
             if(min === 0 && sec === 30){
-              fetch('/api/getbetdata',{
+              fetch(`${Hosturl}/api/getbetdata`,{
                 method:'post',
                 body:JSON.stringify({server:'emerd'}),
                 headers:{
@@ -279,7 +361,7 @@ const SessionEmerd = () => {
                 }).then((data)=>data.json()).then((finalData)=>{
                   if(finalData.count === 0){
                     let getDataInterval = setInterval(()=>{
-                     fetch('/api/getbetdata',{
+                     fetch(`${Hosturl}/api/getbetdata`,{
                      method:'post',
                      body:JSON.stringify({server:'emerd'}),
                      headers:{
@@ -330,6 +412,80 @@ const SessionEmerd = () => {
   return (
     <>
         <SideBar cl5="uil uil-chart-line active-menu" clFive="active-menu" />
+        <div id="modal-background" className="modal-background hide-submenu"></div>
+
+        <div id="rule-modal" className="rule-modal w-[90%] ml-[5%] setRuleModal static">
+          <div className="rule-modal-content">
+          <div className="rule-modal-title bg-white" id="title"></div>
+        <div className="w-[100%] flex flex-col p-[12px] text-[10px] leading-[20px] overflow-auto">
+        <p id="query"> </p>
+
+        <div className="flex flex-row justify-around">
+        <div><label><input type="radio" name="time" value="10" onChange={()=>{ setPredictionTime(10)}}/> 10 AM</label></div>
+        <div><label><input type="radio" name="time" value="2" onChange={()=>{ setPredictionTime(2)}}/>  2 PM</label></div>
+        <div><label><input type="radio" name="time" value="5" onChange={()=>{ setPredictionTime(5)}}/> 5 PM</label></div>
+        <div><label><input type="radio" name="time" value="8" onChange={()=>{ setPredictionTime(8)}}/> 8 PM</label></div>
+        </div>
+
+        <div className="flex flex-row justify-around">
+        <div><label><input type="radio" name="color" value="green" onChange={()=>{ setColor('green')}}/>Green</label></div>
+        <div><label><input type="radio" name="color" value="red" onChange={()=>{ setColor('red')}}/>Red</label></div>
+        </div>
+
+
+
+          <div ref={divRef} style={{ width: "1010px", height: "", fontSize:"15px", fontWeight:"600" }}>
+            <div className="flex flex-row bg-black justify-around">
+              <div className="mt-[30px]">
+                <p style={{ fontSize: "25px", color: "white" }}>
+                  Runmall Official{" "}
+                </p>
+              </div>
+              <div style={{ fontSize: "16px", color: "white", marginTop:'5px' }}>
+                10:00 AM
+                <br />
+                02:00 PM
+                <br />
+                05:00 PM
+                <br />
+                08:00 PM
+              </div>
+              <div>
+                <img style={{ width: "100px" }} src={RunMall} alt="icon-image" />
+              </div>
+            </div>
+            <div className="result-table">
+              <div className="table-row bg-[#86cdcf]">
+                <div className="table-cell">Server</div>
+                <div className="table-cell">Period</div>
+                <div className="table-cell">Color</div>
+                <div className="table-cell">Amount</div>
+                <div className="table-cell">Result</div>
+              </div>
+              {predictionResult.map((ele)=>{
+              let bg = (ele.predict === 'red')? 'bg-[red] ':(ele.predict === 'green') ? 'bg-[green]' : 'bg-[white]';
+              return (<div className="table-row bg-[white]" key={ele._id}>
+                <div className="table-cell capitalize">{ele.server}</div>
+                <div className="table-cell">{ele.period}</div>
+                <div className={`table-cell ${bg}`}></div>
+                <div className="table-cell" contentEditable="true" suppressContentEditableWarning={true}>1000</div>
+                <div className="table-cell">{ele.result}</div>
+              </div>);
+            })}
+        </div>
+
+          </div>
+
+        </div>
+        <div className="flex relative flex-1 items-center min-h-[60px] justify-center bg-white">
+        <div className="close-btn-first close-btn-second rule-close-btn" onClick={closeRuleModal}>CLOSE</div>
+        <div className="mb-[30px]">Done<input type="checkbox" checked={checked} onChange={()=>setChecked(!checked)} /></div>
+        <div className="close-btn-first close-btn-second rule-close-btn" onClick={genImage}>GENERATE</div>
+        <div className="close-btn-first close-btn-second rule-close-btn" onClick={handleConvertClick}>Download</div>
+        </div>
+          </div>      
+        </div>
+
         <div id="snackbar"></div>
        <section className="dashboard">
         <div className="top">
@@ -527,6 +683,17 @@ const SessionEmerd = () => {
      })}
       </div>
         </div>
+
+        <button style={{
+                    color: "white",
+                    background: "black",
+                    padding: "10px",
+                    borderRadius: "5px",
+                  }}
+                  onClick={hanldeImageGen}
+                  >
+        Generate Image
+        </button>
     </section>
     </>
   )

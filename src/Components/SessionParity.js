@@ -1,8 +1,12 @@
-import React,{useEffect,useState} from 'react';
+import React,{useEffect,useState,useRef} from 'react';
 import { useNavigate } from 'react-router';
 import { NavLink } from 'react-router-dom';
 import AuthAdmin from './AuthAdmin';
 import SideBar from './SideBar';
+import * as htmlToImage from 'html-to-image';
+import RunMall from './images/runmall.jpg';
+import MakePrediction from './MakePrediction';
+import Hosturl from '../Hosturl';
 
 const SessionParity = () => {
 
@@ -12,9 +16,15 @@ const SessionParity = () => {
     const [isNum,setIsNum] = useState(false);
     const [completedTarget,setCompletedTarget] = useState('');
     const [currentTarget,setCurrentTarget] = useState('');
-    const navigate = useNavigate();
+    const navigate = useNavigate();    
     const token = localStorage.getItem('token');
-   
+
+    const [predictionTime, setPredictionTime] = useState('');
+    const [color, setColor] = useState('');
+    const [predictionResult, setPredictionResult] = useState([{server:"",period:"",predict:"",result:""}]);
+    const [checked,setChecked] = useState(false);
+    const divRef = useRef(null); 
+
       function showToast(message) {
           var x = document.getElementById("snackbar");
           x.innerHTML=message;
@@ -74,7 +84,7 @@ const SessionParity = () => {
         return newDate.getSeconds();
       }
 
-    const hanldeSelect = (e)=>{
+      const hanldeSelect = (e)=>{
     let number = parseInt(e.target.value);
     setNum(number);
 
@@ -84,12 +94,12 @@ const SessionParity = () => {
         showToast('Please wait');
       }
 
-    }
+      }
 
-    const setTarget  = ()=>{
+      const setTarget  = ()=>{
      let targetAmount = prompt('Please enter amount');
      if(parseInt(targetAmount) >0){
-      fetch('/api/setactivetarget',{
+      fetch(`${Hosturl}/api/setactivetarget`,{
         method:'post',
         body:JSON.stringify({server:'parity',target:targetAmount}),
         headers:{
@@ -99,7 +109,7 @@ const SessionParity = () => {
       }).then((data)=>data.json()).then((finalData)=>{
 
          if(finalData.message === 'success'){
-          fetch('/api/getalltargets',{
+          fetch(`${Hosturl}/api/getalltargets`,{
             method:'post',
             body:JSON.stringify({server:'parity'}),
             headers:{
@@ -109,63 +119,133 @@ const SessionParity = () => {
           }).then((data)=>data.json()).then((finalData)=>{
             setCurrentTarget(finalData.curretTarget);
             setCompletedTarget(finalData.completedTargets);
-            
           });
        }
       });
      }else{
        showToast('Please enter valid amount');
      }
-    }
-
-
-    const submitPeriod = ()=>{
-     let remainMin = Math.abs(getMinutes()%3 - 2);
-     let remainSec = 59 - getSec();
-     console.log(num);
-
-     if(num === ''){
-      showToast('Please select number ');
-    }else{
-      if(remainMin === 0){
-        if(remainSec <=30 && remainSec>5){
-          fetch('/api/updatebet',{
-          method:'post',
-          body:JSON.stringify({server:'parity',number:num}),
-          headers:{
-            'Content-type':'application/json',
-            'Authorization':`Bearer ${token}`
       }
-      }).then((data)=>data.json()).then((finalData)=>{
-        console.log(finalData);
-        if(finalData.message === 'success'){
-          
-          fetch('/api/getalltargets',{
-          method:'post',
-          body:JSON.stringify({server:'parity'}),
-          headers:{
-          'Content-Type':'application/json',
-          'authorization':`Bearer ${token}`
+
+      const submitPeriod = ()=>{
+      let remainMin = Math.abs(getMinutes()%3 - 2);
+      let remainSec = 59 - getSec();
+
+      if(num === ''){
+        showToast('Please select number ');
+      }else{
+        if(remainMin === 0){
+          if(remainSec <=30 && remainSec>5){
+            fetch(`${Hosturl}/api/updatebet`,{
+            method:'post',
+            body:JSON.stringify({server:'parity',number:num}),
+            headers:{
+              'Content-type':'application/json',
+              'Authorization':`Bearer ${token}`
+        }
+        }).then((data)=>data.json()).then((finalData)=>{
+          console.log(finalData);
+          if(finalData.message === 'success'){
+            
+            fetch(`${Hosturl}/api/getalltargets`,{
+            method:'post',
+            body:JSON.stringify({server:'parity'}),
+            headers:{
+            'Content-Type':'application/json',
+            'authorization':`Bearer ${token}`
+            }
+          }).then((data)=>data.json()).then((finalData)=>{
+          setCurrentTarget(finalData.curretTarget);
+          setCompletedTarget(finalData.completedTargets);
+          });
+
+            showToast('Submitted successfully');
+          }else{
+            showToast('Some error occurred');
           }
-         }).then((data)=>data.json()).then((finalData)=>{
-         setCurrentTarget(finalData.curretTarget);
-         setCompletedTarget(finalData.completedTargets);
         });
 
-          showToast('Submitted successfully');
+          }else{
+          showToast('Please wait ...');
+          }
         }else{
-          showToast('Some error occurred');
+          showToast('Please wait ...');
         }
-      });
-
-        }else{
-         showToast('Please wait ...');
-        }
-      }else{
-        showToast('Please wait ...');
       }
+      }
+
+    const handleConvertClick = () => {
+      const divElement = divRef.current; 
+      htmlToImage.toPng(divElement)
+        .then(function (dataUrl) {
+          const link = document.createElement('a');
+          link.download = 'my-image.png';
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch(function (error) {
+          console.error('Oops, something went wrong!', error);
+        });
+    };
+
+    const hanldeImageGen  = ()=>{
+      OpenRuleModal('Make prediction');
     }
+
+    
+    const genImage = ()=>{
+
+      if(color === ''){
+        showToast('Please select color');
+        return;
+      }
+      
+      let Currdate = new Date();
+      let thisYear = String(Currdate.getUTCFullYear());
+      let thisMonth = String((Currdate.getMonth() + 1) >= 10 ? (Currdate.getMonth() + 1) : '0' + String((Currdate.getMonth() + 1)));
+      let toDay = String(((Currdate.getDate()) >= 10) ? (Currdate.getDate()) : '0' + String(Currdate.getDate()));
+      let x = thisYear + thisMonth + toDay;
+
+      let cp = getPeriod();
+
+      if(predictionTime === 10){
+        x = x + '201';
+      }else if(predictionTime === 2){
+        x = x + '281';
+      }else if(predictionTime === 5){
+        x = x + '341';
+      }else if(predictionTime === 8){
+        x = x + '401';
+      }
+      
+      if(x === cp){
+        MakePrediction('parity',cp,color,x,true).then(()=>{
+          setPredictionResult([{server:'parity',period:cp,predict:color,result:''}]);
+        });
+      }else{
+        MakePrediction('parity',cp,color,x,false).then((data)=>{
+          console.log(data.data);
+          if(checked){
+            setPredictionResult([...data.data,{server:'',period:'',predict:'white',result:'Profit'}]);
+          }else{
+            setPredictionResult([...data.data,{server:'parity',period:cp,predict:color,result:''}]);
+          }
+        });
+      }
+
     }
+
+    const OpenRuleModal = (title)=>{
+      document.getElementById('rule-modal').classList.add('show-submenu');
+      document.getElementById("modal-background").classList.add("show-submenu");
+      document.getElementById('title').innerHTML = title;
+      }
+  
+     const closeRuleModal = ()=>{
+          document.getElementById('rule-modal').classList.remove('show-submenu');
+          document.getElementById("modal-background").classList.remove("show-submenu");
+      }
+
     useEffect(()=>{
         AuthAdmin().then((finalData)=>{
             if(finalData.message !== 'success'){
@@ -173,7 +253,7 @@ const SessionParity = () => {
             }
           });
 
-      fetch('/api/getalltargets',{
+      fetch(`${Hosturl}/api/getalltargets`,{
         method:'post',
         body:JSON.stringify({server:'parity'}),
         headers:{
@@ -183,7 +263,6 @@ const SessionParity = () => {
       }).then((data)=>data.json()).then((finalData)=>{
         setCurrentTarget(finalData.curretTarget);
         setCompletedTarget(finalData.completedTargets);
-        console.log(finalData);
       });
 
 
@@ -192,7 +271,7 @@ const SessionParity = () => {
         let sec = getSec();
 
         if(min === 0 && sec >30){
-          fetch('/api/getbetdata',{
+          fetch(`${Hosturl}/api/getbetdata`,{
             method:'post',
             body:JSON.stringify({server:'parity'}),
             headers:{
@@ -202,7 +281,7 @@ const SessionParity = () => {
             }).then((data)=>data.json()).then((finalData)=>{
               if(finalData.count === 0){
                 let getDataInter = setInterval(()=>{
-                 fetch('/api/getbetdata',{
+                 fetch(`${Hosturl}/api/getbetdata`,{
                  method:'post',
                  body:JSON.stringify({server:'parity'}),
                  headers:{
@@ -269,7 +348,7 @@ const SessionParity = () => {
             }
 
             if(min === 0 && sec === 30){
-              fetch('/api/getbetdata',{
+              fetch(`${Hosturl}/api/getbetdata`,{
                 method:'post',
                 body:JSON.stringify({server:'parity'}),
                 headers:{
@@ -279,7 +358,7 @@ const SessionParity = () => {
                 }).then((data)=>data.json()).then((finalData)=>{
                   if(finalData.count === 0){
                     let getDataInterval = setInterval(()=>{
-                     fetch('/api/getbetdata',{
+                     fetch(`${Hosturl}/api/getbetdata`,{
                      method:'post',
                      body:JSON.stringify({server:'parity'}),
                      headers:{
@@ -327,212 +406,439 @@ const SessionParity = () => {
         }, 1000);
 
         },[]);
+
   return (
     <>
-        <SideBar cl5="uil uil-chart-line active-menu" clFive="active-menu" />
-        <div id="snackbar"></div>
-       <section className="dashboard">
-        <div className="top">
-            <i onClick={toggleSidebar} className="uil uil-bars sidebar-toggle"></i>
-        <div className="search-box">
-                <i className="uil uil-search"></i>
-                <input type="text" name="search" placeholder="Search here"  autoComplete="off"/>
+      <SideBar cl5="uil uil-chart-line active-menu" clFive="active-menu" />
+
+      <div id="modal-background" className="modal-background hide-submenu"></div>
+
+      <div id="rule-modal" className="rule-modal w-[90%] ml-[5%] setRuleModal static">
+        <div className="rule-modal-content">
+        <div className="rule-modal-title bg-white" id="title"></div>
+      <div className="w-[100%] flex flex-col p-[12px] text-[10px] leading-[20px] overflow-auto">
+      <p id="query"> </p>
+    
+     <div className="flex flex-row justify-around">
+      <div><label><input type="radio" name="time" value="10" onChange={()=>{ setPredictionTime(10)}}/> 10 AM</label></div>
+      <div><label><input type="radio" name="time" value="2" onChange={()=>{ setPredictionTime(2)}}/>  2 PM</label></div>
+      <div><label><input type="radio" name="time" value="5" onChange={()=>{ setPredictionTime(5)}}/> 5 PM</label></div>
+      <div><label><input type="radio" name="time" value="8" onChange={()=>{ setPredictionTime(8)}}/> 8 PM</label></div>
+      </div>
+
+      <div className="flex flex-row justify-around">
+      <div><label><input type="radio" name="color" value="green" onChange={()=>{ setColor('green')}}/>Green</label></div>
+      <div><label><input type="radio" name="color" value="red" onChange={()=>{ setColor('red')}}/>Red</label></div>
+      </div>
+
+
+
+      <div ref={divRef} style={{ width: "1010px", height: "", fontSize:"15px", fontWeight:"600" }}>
+          <div className="flex flex-row bg-black justify-around">
+            <div className="mt-[30px]">
+              <p style={{ fontSize: "25px", color: "white" }}>
+                Runmall Official{" "}
+              </p>
             </div>
+            <div style={{ fontSize: "16px", color: "white", marginTop:'5px' }}>
+              10:00 AM
+              <br />
+              02:00 PM
+              <br />
+              05:00 PM
+              <br />
+              08:00 PM
+            </div>
+            <div>
+              <img style={{ width: "100px" }} src={RunMall} alt="icon-image" />
+            </div>
+          </div>
+          <div className="result-table">
+            <div className="table-row bg-[#86cdcf]">
+              <div className="table-cell">Server</div>
+              <div className="table-cell">Period</div>
+              <div className="table-cell">Color</div>
+              <div className="table-cell">Amount</div>
+              <div className="table-cell">Result</div>
+            </div>
+            {predictionResult.map((ele)=>{
+            let bg = (ele.predict === 'red')? 'bg-[red] ':(ele.predict === 'green') ? 'bg-[green]' : 'bg-[white]';
+            return (<div className="table-row bg-[white]" key={ele._id}>
+              <div className="table-cell capitalize">{ele.server}</div>
+              <div className="table-cell">{ele.period}</div>
+              <div className={`table-cell ${bg}`}></div>
+              <div className="table-cell" contentEditable="true" suppressContentEditableWarning={true}>1000</div>
+              <div className="table-cell">{ele.result}</div>
+            </div>);
+          })}
+      </div>
+
+        </div>
+
+    </div>
+      <div className="flex relative flex-1 items-center min-h-[60px] justify-center bg-white">
+      <div className="close-btn-first close-btn-second rule-close-btn" onClick={closeRuleModal}>CLOSE</div>
+      <div className="mb-[30px]">Done<input type="checkbox" checked={checked} onChange={()=>setChecked(!checked)} /></div>
+      <div className="close-btn-first close-btn-second rule-close-btn" onClick={genImage}>GENERATE</div>
+      <div className="close-btn-first close-btn-second rule-close-btn" onClick={handleConvertClick}>Download</div>
+      </div>
+        </div>      
+      </div>
+
+      <div id="snackbar"></div>
+      <section className="dashboard">
+        <div className="top">
+          <i onClick={toggleSidebar}
+            className="uil uil-bars sidebar-toggle"
+          ></i>
+          <div className="search-box">
+            <i className="uil uil-search"></i>
+            <input
+              type="text"
+              name="search"
+              placeholder="Search here"
+              autoComplete="off"
+            />
+          </div>
         </div>
         <div className="dash-content">
-        <div className="activity">
-                <div className="title">
-                    <i className="uil uil-clock-three"></i>
-                    <span className="text">All Session</span>
-                </div>
-        </div>
-        <div className="flex flex-row justify-around">
-        <NavLink to="/sessions/parity"><div><button className="server-btn active-server">Parity</button></div></NavLink>
-        <NavLink to="/sessions/sapre"><div><button className="server-btn">Sapre</button></div></NavLink>
-        <NavLink to="/sessions/bcone"><div><button className="server-btn">Bcone</button></div></NavLink>
-        <NavLink to="/sessions/emerd"><div><button className="server-btn">Emerd</button></div></NavLink>
+          <div className="activity">
+            <div className="title">
+              <i className="uil uil-clock-three"></i>
+              <span className="text">All Session</span>
+            </div>
           </div>
-        <h1 className="text-[24px]">Manage Winning Result</h1>
+          <div className="flex flex-row justify-around">
+            <NavLink to="/sessions/parity">
+              <div>
+                <button className="server-btn active-server">Parity</button>
+              </div>
+            </NavLink>
+            <NavLink to="/sessions/sapre">
+              <div>
+                <button className="server-btn">Sapre</button>
+              </div>
+            </NavLink>
+            <NavLink to="/sessions/bcone">
+              <div>
+                <button className="server-btn">Bcone</button>
+              </div>
+            </NavLink>
+            <NavLink to="/sessions/emerd">
+              <div>
+                <button className="server-btn">Emerd</button>
+              </div>
+            </NavLink>
+          </div>
+          <h1 className="text-[24px]">Manage Winning Result</h1>
 
-        <div className="flex flex-row justify-between">
+          <div className="flex flex-row justify-between">
             <div className="flex flex-col">
-                <div>Count Down:</div>
-                <div id="countDown" ></div>
+              <div>Count Down:</div>
+              <div id="countDown"></div>
             </div>
             <div className="flex flex-col">
-                <div>Active Period Id</div>
-                <div id="period"></div>
+              <div>Active Period Id</div>
+              <div id="period"></div>
             </div>
             <div className="flex flex-col">
               <div>Do you want manual result ?</div>
               <div className="flex flex-row justify-around">
-                <div>Yes <input className="cursor-pointer" type="radio" name="resulttype" value="yes" /></div>
-                <div>No <input className="cursor-pointer" type="radio" name="resulttype" value="no" /></div>
+                <div>
+                  Yes
+                  <input
+                    className="cursor-pointer"
+                    type="radio"
+                    name="resulttype"
+                    value="yes"
+                  />
+                </div>
+                <div>
+                  No
+                  <input
+                    className="cursor-pointer"
+                    type="radio"
+                    name="resulttype"
+                    value="no"
+                  />
+                </div>
               </div>
             </div>
-        </div>
+          </div>
 
-        <div className="TableRow heading justify-between mt-20">
+          <div className="TableRow heading justify-between mt-20">
             <div className="TableColumn">Result</div>
             <div className="TableColumn">Number</div>
             <div className="TableColumn">No. of bets</div>
             <div className="TableColumn">Amounts</div>
             <div className="TableColumn">Action</div>
             <div className="TableColumn">Profit/Loss</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between mt-20">
-            <div className="TableColumn"><span className="color-red">Red &nbsp; </span> + <span className="color-violet"> &nbsp; Violet</span></div>
+          <div className="TableRow justify-between mt-20">
+            <div className="TableColumn">
+              <span className="color-red">Red &nbsp; </span> +{" "}
+              <span className="color-violet"> &nbsp; Violet</span>
+            </div>
             <div className="TableColumn">0</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[0]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="0" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="0"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[0]}</div>
-        </div>
-        
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-green">Green</span></div>
+          </div>
+
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-green">Green</span>
+            </div>
             <div className="TableColumn">1</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[1]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="1" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="1"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[1]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-red">Red</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-red">Red</span>
+            </div>
             <div className="TableColumn">2</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[2]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="2" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="2"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[2]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-green">Green</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-green">Green</span>
+            </div>
             <div className="TableColumn">3</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[3]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="3" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="3"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[3]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-red">Red</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-red">Red</span>
+            </div>
             <div className="TableColumn">4</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[4]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="4" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="4"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[4]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-green">Green &nbsp; </span> + <span className="color-violet"> &nbsp; Violet</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-green">Green &nbsp; </span> +{" "}
+              <span className="color-violet"> &nbsp; Violet</span>
+            </div>
             <div className="TableColumn">5</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[5]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="5" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="5"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[5]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-red">Red</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-red">Red</span>
+            </div>
             <div className="TableColumn">6</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[6]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="6" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="6"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[6]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-green">Green</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-green">Green</span>
+            </div>
             <div className="TableColumn">7</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[7]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="7" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="7"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[7]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-red">Red</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-red">Red</span>
+            </div>
             <div className="TableColumn">8</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[8]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="8" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="8"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[8]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-green">Green</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-green">Green</span>
+            </div>
             <div className="TableColumn">9</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[9]}</div>
-            <div className="TableColumn"><input type="radio" onChange={hanldeSelect} name="select-number" value="9" /></div>
+            <div className="TableColumn">
+              <input
+                type="radio"
+                onChange={hanldeSelect}
+                name="select-number"
+                value="9"
+              />
+            </div>
             <div className="TableColumn">{profitLoss[9]}</div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-red">Red</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-red">Red</span>
+            </div>
             <div className="TableColumn">Red</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[12]}</div>
             <div className="TableColumn">Can't select</div>
             <div className="TableColumn"></div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-red">Green</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-red">Green</span>
+            </div>
             <div className="TableColumn">Green</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[10]}</div>
             <div className="TableColumn">Can't select</div>
             <div className="TableColumn"></div>
-        </div>
+          </div>
 
-        <div className="TableRow justify-between">
-            <div className="TableColumn"><span className="color-violet">Violet</span></div>
+          <div className="TableRow justify-between">
+            <div className="TableColumn">
+              <span className="color-violet">Violet</span>
+            </div>
             <div className="TableColumn">Violet</div>
             <div className="TableColumn">Wait..</div>
             <div className="TableColumn">{betMoney[11]}</div>
             <div className="TableColumn">Can't select</div>
             <div className="TableColumn"></div>
+          </div>
+
+          <button onClick={submitPeriod} className="submit-period">
+            Submit
+          </button>
+          <h3 className="mt-[10px] text-[#0066ff] text-[18px]">All Targets</h3>
+          <div className="flex flex-col mt-[10px]">
+            <h2 className="text-[18px] mb-[5px]">Set Active target :</h2>
+            <button
+              className="bg-blue-800 w-[80px] text-center text-white p-[10px] rounded-[5px] text-[18px] mb-[10px]"
+              onClick={setTarget}
+            >
+              Set
+            </button>
+          </div>
+
+          <div className="flex flex-col mt-[20px]">
+            <h2 className="text-[18px] mb-[10px]">Active target :</h2>
+
+            <div className="flex flex-row gap-[20px]">
+              <div>Target : {currentTarget.Target}</div>
+              <div>Profit/Loss : {currentTarget.ProfitOrLoss}</div>
+            </div>
+          </div>
+          <div className="flex flex-col mt-[20px]">
+            <h2 className="text-[18px] mb-[10px]">Completed target :</h2>
+            {Object.values(completedTarget).map((val, index) => {
+              return (
+                <div className="flex flex-row gap-[20px]" key={val._id}>
+                  <div>Period : {val.Period}</div>
+                  <div>Target : {val.Target}</div>
+                  <div>Profit/Loss : {val.ProfitOrLoss}</div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-
-        <button onClick={submitPeriod} className="submit-period">Submit</button>
-       <h3 className="mt-[10px] text-[#0066ff] text-[18px]">All Targets</h3>
-      <div className="flex flex-col mt-[10px]">
-      <h2 className='text-[18px] mb-[5px]'>Set Active target :</h2>
-      <button className="bg-blue-800 w-[80px] text-center text-white p-[10px] rounded-[5px] text-[18px] mb-[10px]" onClick={setTarget}>Set</button>
-      </div>
-
-      <div className="flex flex-col mt-[20px]">
-      <h2 className='text-[18px] mb-[10px]'>Active target :</h2>
-      
-      <div className='flex flex-row gap-[20px]'>
-        <div>Target : {currentTarget.Target}</div>
-        <div>Profit/Loss : {currentTarget.ProfitOrLoss}</div>
-      </div>
-
-      </div>
-      <div className="flex flex-col mt-[20px]">
-      <h2 className='text-[18px] mb-[10px]'>Completed target :</h2>
-     {Object.values(completedTarget).map((val,index)=>{
-      return(
-      <div className='flex flex-row gap-[20px]' key={val._id}>
-        <div>Period : {val.Period}</div>
-        <div>Target : {val.Target}</div>
-        <div>Profit/Loss : {val.ProfitOrLoss}</div>
-      </div>
-      );
-     })}
-      </div>
-
-      
-
-        </div>
-    </section>
+        
+        <button style={{
+                    color: "white",
+                    background: "black",
+                    padding: "10px",
+                    borderRadius: "5px",
+                  }}
+                  onClick={hanldeImageGen}
+                  >
+        Generate Image
+        </button>
+      </section>
     </>
-  )
+  );
 }
 
 export default SessionParity;

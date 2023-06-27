@@ -2,6 +2,7 @@ import React,{useRef,useEffect, useState} from 'react'
 import { NavLink,useNavigate} from 'react-router-dom';
 import AuthAdmin from './AuthAdmin';
 import SideBar from './SideBar';
+import Hosturl from '../Hosturl';
 
 const Recharge = () => {
    
@@ -37,7 +38,7 @@ const Recharge = () => {
      
     const deleteUpi = (e)=>{
 
-        fetch('/api/delete',{
+        fetch(`${Hosturl}/api/delete`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -47,7 +48,7 @@ const Recharge = () => {
           }).then((data)=>data.json()).then((finalData)=>{
               if(finalData.message === 'success'){
             showToast('UPI Deleted successfully !');
-                  fetch('/api/showupi',{
+                  fetch(`${Hosturl}/api/showupi`,{
                       method:'get',
                       headers:{
                           'Content-Type':'application/json',
@@ -63,7 +64,7 @@ const Recharge = () => {
 
     const addUPI = ()=>{
       let upi = prompt('Enter new upi id');
-      fetch('/api/addupi',{
+      fetch(`${Hosturl}/api/addupi`,{
         method:'post',
         body:JSON.stringify({upi:upi}),
         headers:{
@@ -73,7 +74,7 @@ const Recharge = () => {
       }).then((data)=>data.json()).then((finalData)=>{
           if(finalData.message === 'success'){
             showToast('New UPI added successfully ');
-              fetch('/api/showupi',{
+              fetch(`${Hosturl}/api/showupi`,{
                   method:'get',
                   headers:{
                       'Content-Type':'application/json',
@@ -90,7 +91,7 @@ const Recharge = () => {
     const handlePrev  = ()=>{
         if(currePageNo !==1){
           setCurrePageNo(currePageNo-1);
-          fetch('/api/getrecharge',{
+          fetch(`${Hosturl}/api/getrecharge`,{
           method:'post',
           body:JSON.stringify({type:'prev',lastTime:lastTime,firstBetTime:firstBetTime}),
           headers:{
@@ -116,7 +117,7 @@ const Recharge = () => {
     const handleNext  = ()=>{
         if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
             setCurrePageNo(currePageNo+1);
-            fetch('/api/getrecharge',{
+            fetch(`${Hosturl}/api/getrecharge`,{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:lastTime,firstBetTime:firstBetTime}),
                 headers:{
@@ -136,7 +137,7 @@ const Recharge = () => {
     const ApproveRecharge = (e)=>{
         let con = window.confirm('Are you sure want to approve this recharge ?');
         if(con){
-        fetch('/api/approverecharge',{
+        fetch(`${Hosturl}/api/approverecharge`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -156,7 +157,7 @@ const Recharge = () => {
      const RejectRecharge = (e)=>{
         let con = window.confirm('Are you sure want to reject this recharge ?');
         if(con){
-            fetch('/api/rejectrecharge',{
+            fetch(`${Hosturl}/api/rejectrecharge`,{
                 method:'post',
                 body:JSON.stringify({id:e.target.id}),
                 headers:{
@@ -181,7 +182,7 @@ const Recharge = () => {
               alert('Please enter valid UTR No');
               return;
           }
-          fetch('/api/searchrecharge',{
+          fetch(`${Hosturl}/api/searchrecharge`,{
           method:'post',
           body:JSON.stringify({search:search}),
           headers:{
@@ -205,7 +206,7 @@ const Recharge = () => {
               navigate('/');
             }
           });
-      fetch('/api/showupi',{
+      fetch(`${Hosturl}/api/showupi`,{
             method:'get',
             headers:{
                 'Content-Type':'application/json',
@@ -215,7 +216,7 @@ const Recharge = () => {
                 setUpidata(finalData);
             });
     
-     fetch('/api/getrecharge',{
+     fetch(`${Hosturl}/api/getrecharge`,{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:0,firstBetTime:0}),
                 headers:{
@@ -223,7 +224,6 @@ const Recharge = () => {
                     'Authorization':`Bearer ${token}`
                 }
                 }).then((data)=>data.json()).then((finalData)=>{
-                console.log(finalData.recharge);
                 setRecharge(finalData.recharge);
                 setTotalDoc(finalData.count);
                 setLastTime(Object.values(finalData.recharge)[Object.values(finalData.recharge).length - 1].time);

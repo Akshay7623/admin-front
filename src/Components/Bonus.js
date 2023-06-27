@@ -2,6 +2,7 @@ import React,{useState,useEffect} from 'react';
 import { useNavigate } from 'react-router';
 import SideBar from './SideBar';
 import AuthAdmin from './AuthAdmin';
+import Hosturl from '../Hosturl';
 
 const Bonus = () => {
     
@@ -27,7 +28,7 @@ const Bonus = () => {
     const handlePrev  = ()=>{
         if(currePageNo !==1){
           setCurrePageNo(currePageNo-1);
-          fetch('/api/getbonusrecord',{
+          fetch(`${Hosturl}/api/getbonusrecord`,{
           method:'post',
           body:JSON.stringify({type:'prev',lastTime:lastTime,firstWithTime:firstWithTime}),
           headers:{
@@ -53,7 +54,7 @@ const Bonus = () => {
     const handleNext  = ()=>{
         if(currePageNo !== Math.ceil(totalDoc/perPageDoc)){
             setCurrePageNo(currePageNo+1);
-            fetch('/api/getbonusrecord',{
+            fetch(`${Hosturl}/api/getbonusrecord`,{
                 method:'post',
                 body:JSON.stringify({type:'next',lastTime:lastTime,firstWithTime:firstWithTime}),
                 headers:{
@@ -81,7 +82,7 @@ const Bonus = () => {
 
 
     const ApproveBonus = (e)=>{
-        fetch('/api/approvebonus',{
+        fetch(`${Hosturl}/api/approvebonus`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -100,7 +101,7 @@ const Bonus = () => {
     }
 
     const RejectBonus = (e)=>{
-        fetch('/api/rejectbonus',{
+        fetch(`${Hosturl}/api/rejectbonus`,{
             method:'post',
             body:JSON.stringify({id:e.target.id}),
             headers:{
@@ -126,7 +127,7 @@ const Bonus = () => {
             }
         });
 
-        fetch('/api/getbonusrecord',{
+        fetch(`${Hosturl}/api/getbonusrecord`,{
             method:'post',
             body:JSON.stringify({type:'next',lastTime:0,firstWithTime:0}),
             headers:{
